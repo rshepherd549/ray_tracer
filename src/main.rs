@@ -1,14 +1,15 @@
 
-fn is_approx_eq(lhs: f64, rhs: f64) -> bool {
-    const tol: f64 = 1e-6;
-    return (lhs == rhs) || ((lhs-rhs).abs() < tol);
+trait ApproxEq<Rhs=Self> {
+    type Output;
+    fn is_approx_eq(self, rhs:Rhs) -> bool;
 }
 
-#[test]
-fn test_is_approx_eq_f64() {
-    assert!( is_approx_eq(1.0,1.0));
-    assert!( is_approx_eq(1.0,1.0+1e-7));
-    assert!(!is_approx_eq(1.0,1.0+1e-5));
+impl ApproxEq for f64 {
+    type Output = f64;
+    fn is_approx_eq(self, rhs: f64) -> bool {
+        const TOL: f64 = 1e-6;
+        return (self == rhs) || ((self-rhs).abs() < TOL);
+    }
 }
 
 struct Tuple {
@@ -26,17 +27,24 @@ fn make_vector(x:f64, y:f64, z:f64) -> Tuple {
     return Tuple {x,y,z,w:0};
 }
 
-fn is_approx_eq_tuple(lhs: Tuple, rhs: Tuple) -> bool {
-    return is_approx_eq(lhs.x, rhs.x)
-        && is_approx_eq(lhs.y, rhs.y)
-        && is_approx_eq(lhs.z, rhs.z)
-        && (lhs.w == rhs.w);
+impl ApproxEq for Tuple {
+    type Output = f64;
+    fn is_approx_eq(self, rhs: Tuple) -> bool {
+        return self.x.is_approx_eq(rhs.x) && 
+               self.y.is_approx_eq(rhs.y) && 
+               self.z.is_approx_eq(rhs.z) && 
+               self.w == rhs.w;
+    }
 }
 
 #[test]
-fn test_is_approx_eq_tuple() {
-    assert!( is_approx_eq_tuple(make_point(1.1,2.2,3.3),make_point(1.1,2.2,3.3)));    
-    assert!(!is_approx_eq_tuple(make_point(1.1,2.2,3.3),make_point(2.1,2.2,3.3)));    
+fn test_is_approx_eq() {
+    assert!( 1.0.is_approx_eq(1.0));
+    assert!( 1.0.is_approx_eq(1.0+1e-7));
+    assert!(!1.0.is_approx_eq(1.0+1e-5));
+
+    assert!( make_point(1.1,2.2,3.3).is_approx_eq(make_point(1.1,2.2,3.3)));    
+    assert!(!make_point(1.1,2.2,3.3).is_approx_eq(make_point(2.1,2.2,3.3)));    
 }
 
 fn main() {
