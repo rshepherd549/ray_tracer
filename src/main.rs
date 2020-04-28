@@ -37,6 +37,11 @@ impl ApproxEq for Tuple {
     }
 }
 
+fn is_approx_eq<T: ApproxEq>(lhs:T, rhs:T) -> bool
+{
+    return lhs.is_approx_eq(rhs);
+}
+
 #[test]
 fn test_is_approx_eq() {
     assert!( 1.0.is_approx_eq(1.0));
@@ -45,6 +50,23 @@ fn test_is_approx_eq() {
 
     assert!( make_point(1.1,2.2,3.3).is_approx_eq(make_point(1.1,2.2,3.3)));    
     assert!(!make_point(1.1,2.2,3.3).is_approx_eq(make_point(2.1,2.2,3.3)));    
+
+    assert!( make_vector(1.1,2.2,3.3).is_approx_eq(make_vector(1.1,2.2,3.3)));    
+    assert!(!make_vector(1.1,2.2,3.3).is_approx_eq(make_vector(2.1,2.2,3.3)));    
+
+    assert!(!make_point(1.1,2.2,3.3).is_approx_eq(make_vector(1.1,2.2,3.3)));    
+
+    assert!( is_approx_eq(1.0, 1.0));
+    assert!( is_approx_eq(1.0, 1.0+1e-7));
+    assert!(!is_approx_eq(1.0, 1.0+1e-5));
+
+    assert!( is_approx_eq(make_point(1.1,2.2,3.3), make_point(1.1,2.2,3.3)));    
+    assert!(!is_approx_eq(make_point(1.1,2.2,3.3), make_point(2.1,2.2,3.3)));    
+
+    assert!( is_approx_eq(make_vector(1.1,2.2,3.3), make_vector(1.1,2.2,3.3)));    
+    assert!(!is_approx_eq(make_vector(1.1,2.2,3.3), make_vector(2.1,2.2,3.3)));    
+
+    assert!(!is_approx_eq(make_point(1.1,2.2,3.3), make_vector(1.1,2.2,3.3)));    
 }
 
 fn main() {
