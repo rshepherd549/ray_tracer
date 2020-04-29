@@ -1,4 +1,4 @@
-
+use std::f64;
 use std::ops::Add;
 use std::ops::AddAssign;
 use std::ops::Div;
@@ -198,7 +198,14 @@ fn abs_sqr(tuple: Tuple) -> f64 {
 }
 
 fn abs(tuple: Tuple) -> f64 {
-    return sqrt(abs_sqr(tuple)); 
+    return abs_sqr(tuple).sqrt(); 
+}
+
+#[test]
+fn test_abs_tuple()
+{
+    assert!(is_approx_eq(abs(make_vector(3.0,4.0,0.0)), 5.0));
+    assert!(is_approx_eq(abs(make_point(0.0,3.0,-4.0)), 5.0));
 }
 
 fn main() {

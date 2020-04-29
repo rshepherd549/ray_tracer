@@ -9,3 +9,4 @@ No overloading of functions!?
 
 Rather than Tuple being used for Vector and Point, use types and a variant (enum)?
 
+Difficulty finding the sqrt function! Eventually found in `use std::f64;`. Still some confusion over whether to use as a function or as a member.
