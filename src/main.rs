@@ -11,12 +11,12 @@ use std::ops::SubAssign;
 
 trait ApproxEq<Rhs=Self> {
     type Output;
-    fn is_approx_eq(self, rhs:Rhs) -> bool;
+    fn is_approx_eq(&self, rhs:&Rhs) -> bool;
 }
 
 impl ApproxEq for f64 {
     type Output = f64;
-    fn is_approx_eq(self, rhs: f64) -> bool {
+    fn is_approx_eq(&self, rhs: &f64) -> bool {
         const TOL: f64 = 1e-6;
         return (self == rhs) || ((self-rhs).abs() < TOL);
     }
@@ -39,44 +39,44 @@ fn make_vector(x:f64, y:f64, z:f64) -> Tuple {
 
 impl ApproxEq for Tuple {
     type Output = f64;
-    fn is_approx_eq(self, other: Tuple) -> bool {
-        return self.x.is_approx_eq(other.x) && 
-               self.y.is_approx_eq(other.y) && 
-               self.z.is_approx_eq(other.z) && 
+    fn is_approx_eq(&self, other: &Tuple) -> bool {
+        return self.x.is_approx_eq(&other.x) && 
+               self.y.is_approx_eq(&other.y) && 
+               self.z.is_approx_eq(&other.z) && 
                self.w == other.w;
     }
 }
 
-fn is_approx_eq<T: ApproxEq>(lhs:T, rhs:T) -> bool
+fn is_approx_eq<T: ApproxEq>(lhs:&T, rhs:&T) -> bool
 {
     return lhs.is_approx_eq(rhs);
 }
 
 #[test]
 fn test_is_approx_eq() {
-    assert!( 1.0.is_approx_eq(1.0));
-    assert!( 1.0.is_approx_eq(1.0+1e-7));
-    assert!(!1.0.is_approx_eq(1.0+1e-5));
+    assert!( 1.0.is_approx_eq(&1.0));
+    assert!( 1.0.is_approx_eq(&(1.0+1e-7)));
+    assert!(!1.0.is_approx_eq(&(1.0+1e-5)));
 
-    assert!( make_point(1.1,2.2,3.3).is_approx_eq(make_point(1.1,2.2,3.3)));    
-    assert!(!make_point(1.1,2.2,3.3).is_approx_eq(make_point(2.1,2.2,3.3)));    
+    assert!( make_point(1.1,2.2,3.3).is_approx_eq(&make_point(1.1,2.2,3.3)));    
+    assert!(!make_point(1.1,2.2,3.3).is_approx_eq(&make_point(2.1,2.2,3.3)));    
 
-    assert!( make_vector(1.1,2.2,3.3).is_approx_eq(make_vector(1.1,2.2,3.3)));    
-    assert!(!make_vector(1.1,2.2,3.3).is_approx_eq(make_vector(2.1,2.2,3.3)));    
+    assert!( make_vector(1.1,2.2,3.3).is_approx_eq(&make_vector(1.1,2.2,3.3)));    
+    assert!(!make_vector(1.1,2.2,3.3).is_approx_eq(&make_vector(2.1,2.2,3.3)));    
 
-    assert!(!make_point(1.1,2.2,3.3).is_approx_eq(make_vector(1.1,2.2,3.3)));    
+    assert!(!make_point(1.1,2.2,3.3).is_approx_eq(&make_vector(1.1,2.2,3.3)));    
 
-    assert!( is_approx_eq(1.0, 1.0));
-    assert!( is_approx_eq(1.0, 1.0+1e-7));
-    assert!(!is_approx_eq(1.0, 1.0+1e-5));
+    assert!( is_approx_eq(&1.0, &1.0));
+    assert!( is_approx_eq(&1.0, &(1.0+1e-7)));
+    assert!(!is_approx_eq(&1.0, &(1.0+1e-5)));
 
-    assert!( is_approx_eq(make_point(1.1,2.2,3.3), make_point(1.1,2.2,3.3)));    
-    assert!(!is_approx_eq(make_point(1.1,2.2,3.3), make_point(2.1,2.2,3.3)));    
+    assert!( is_approx_eq(&make_point(1.1,2.2,3.3), &make_point(1.1,2.2,3.3)));    
+    assert!(!is_approx_eq(&make_point(1.1,2.2,3.3), &make_point(2.1,2.2,3.3)));    
 
-    assert!( is_approx_eq(make_vector(1.1,2.2,3.3), make_vector(1.1,2.2,3.3)));    
-    assert!(!is_approx_eq(make_vector(1.1,2.2,3.3), make_vector(2.1,2.2,3.3)));    
+    assert!( is_approx_eq(&make_vector(1.1,2.2,3.3), &make_vector(1.1,2.2,3.3)));    
+    assert!(!is_approx_eq(&make_vector(1.1,2.2,3.3), &make_vector(2.1,2.2,3.3)));    
 
-    assert!(!is_approx_eq(make_point(1.1,2.2,3.3), make_vector(1.1,2.2,3.3)));    
+    assert!(!is_approx_eq(&make_point(1.1,2.2,3.3), &make_vector(1.1,2.2,3.3)));    
 }
 
 impl Neg for Tuple {
@@ -88,7 +88,7 @@ impl Neg for Tuple {
 
 #[test]
 fn test_neg_tuple() {
-    assert!(is_approx_eq(-make_point(1.2,-3.4,5.6), make_point(-1.2,3.4,-5.6)));
+    assert!(is_approx_eq(&-make_point(1.2,-3.4,5.6), &make_point(-1.2,3.4,-5.6)));
 }
 
 impl Add for Tuple {
@@ -109,11 +109,11 @@ impl AddAssign for Tuple {
 
 #[test]
 fn test_add() {
-    assert!(is_approx_eq(make_point(1.0,2.0,3.0) + make_vector(4.0,-5.0,6.0), make_point(5.0,-3.0,9.0)));
+    assert!(is_approx_eq(&(make_point(1.0,2.0,3.0) + make_vector(4.0,-5.0,6.0)), &make_point(5.0,-3.0,9.0)));
 
     let mut a = make_vector(-2.0,3.5,5.6);
     a += make_vector(3.5,1.0,2.3);
-    assert!(is_approx_eq(a, make_vector(1.5,4.5,7.9)));
+    assert!(is_approx_eq(&a, &make_vector(1.5,4.5,7.9)));
 }
 
 impl Sub for Tuple {
@@ -134,11 +134,11 @@ impl SubAssign for Tuple {
 
 #[test]
 fn test_sub() {
-    assert!(is_approx_eq(make_point(1.0,2.0,3.0) - make_vector(4.0,-5.0,6.0), make_point(-3.0,7.0,-3.0)));
+    assert!(is_approx_eq(&(make_point(1.0,2.0,3.0) - make_vector(4.0,-5.0,6.0)), &make_point(-3.0,7.0,-3.0)));
 
     let mut a = make_vector(-2.0,3.5,5.6);
     a -= make_vector(3.5,1.0,2.3);
-    assert!(is_approx_eq(a, make_vector(-5.5,2.5,3.3)));
+    assert!(is_approx_eq(&a, &make_vector(-5.5,2.5,3.3)));
 }
 
 impl Mul<f64> for Tuple {
@@ -158,11 +158,11 @@ impl MulAssign<f64> for Tuple {
 
 #[test]
 fn test_mul() {
-    assert!(is_approx_eq(make_point(1.0,2.0,3.0) * 2.0, make_point(2.0,4.0,6.0)));
+    assert!(is_approx_eq(&(make_point(1.0,2.0,3.0) * 2.0), &make_point(2.0,4.0,6.0)));
 
     let mut a = make_vector(-2.0,3.5,5.6);
     a *= -0.5;
-    assert!(is_approx_eq(a, make_vector(1.0,-1.75,-2.8)));
+    assert!(is_approx_eq(&a, &make_vector(1.0,-1.75,-2.8)));
 }
 
 impl Div<f64> for Tuple {
@@ -182,30 +182,49 @@ impl DivAssign<f64> for Tuple {
 
 #[test]
 fn test_div() {
-    assert!(is_approx_eq(make_point(1.0,2.0,3.0) / 2.0, make_point(0.5,1.0,1.5)));
+    assert!(is_approx_eq(&(make_point(1.0,2.0,3.0) / 2.0), &make_point(0.5,1.0,1.5)));
 
     let mut a = make_vector(-2.0,3.5,5.6);
     a /= -0.5;
-    assert!(is_approx_eq(a, make_vector(4.0,-7.0,-11.2)));
+    assert!(is_approx_eq(&a, &make_vector(4.0,-7.0,-11.2)));
 }
 
 fn sqr(x: f64) -> f64 {
     return x * x;
 }
 
-fn abs_sqr(tuple: Tuple) -> f64 {
+fn abs_sqr(tuple: &Tuple) -> f64 {
     return sqr(tuple.x) + sqr(tuple.y) + sqr(tuple.z); 
 }
 
-fn abs(tuple: Tuple) -> f64 {
+fn abs(tuple: &Tuple) -> f64 {
     return abs_sqr(tuple).sqrt(); 
+}
+
+fn magnitude(tuple: &Tuple) -> f64 {
+    return abs(tuple); 
 }
 
 #[test]
 fn test_abs_tuple()
 {
-    assert!(is_approx_eq(abs(make_vector(3.0,4.0,0.0)), 5.0));
-    assert!(is_approx_eq(abs(make_point(0.0,3.0,-4.0)), 5.0));
+    assert!(is_approx_eq(&abs(&make_vector(3.0,4.0,0.0)), &5.0));
+    assert!(is_approx_eq(&abs(&make_point(0.0,3.0,-4.0)), &5.0));
+    assert!(is_approx_eq(&magnitude(&make_point(0.0,3.0,-4.0)), &5.0));
+}
+
+fn normalized(tuple: &Tuple) -> Tuple {
+    let mag = magnitude(&tuple);
+    if mag == 0.0 {
+        return Tuple{x:0.0, y:0.0, z:0.0, w:tuple.w};
+    }
+
+    return Tuple{x:tuple.x/mag, y:tuple.y/mag, z:tuple.z/mag, w:tuple.w};
+}
+
+#[test]
+fn test_normalized() {
+    assert!(is_approx_eq(&normalized(&make_vector(1.0,0.0,0.0)), &make_vector(1.0,0.0,0.0)));
 }
 
 fn main() {
