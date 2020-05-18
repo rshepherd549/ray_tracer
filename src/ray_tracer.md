@@ -18,7 +18,17 @@ normalized(tuple) uses abs(tuple) which has moved the tuple.
 
 fiddly making trait function work with references
 - because it forces all implementers to use references
-- and all callsites to provide references
+- and all call sites to provide references
 - not sure how the built in binary and unary functions allow the use of values
   - are those operators moving, and using up, the values?
+  - yes. Those uses are using up values
+  - need to implement trait for reference-type: `impl Add for &Tuple`
+- more tricky with AddAssign which wants different types
+```rust
+impl<'a,'b> AddAssign<&'b Tuple> for Tuple {
+    fn add_assign(&mut self, other:&'b Tuple) {
+```
+  - this allows different types
+  - *might also imply/allow different lifetimes?*
+
 
