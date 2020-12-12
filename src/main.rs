@@ -236,7 +236,128 @@ fn normalized(tuple: &Tuple) -> Tuple {
 #[test]
 fn test_normalized() {
     assert!(is_approx_eq(&normalized(&make_vector(1.0,0.0,0.0)), &make_vector(1.0,0.0,0.0)));
+    assert!(is_approx_eq(&normalized(&make_vector(2.0,0.0,0.0)), &make_vector(1.0,0.0,0.0)));
+    assert!(is_approx_eq(&normalized(&make_vector(0.0,2.0,0.0)), &make_vector(0.0,1.0,0.0)));
+    assert!(is_approx_eq(&normalized(&make_vector(3.0,4.0,0.0)), &make_vector(0.6,0.8,0.0)));
+    assert!(is_approx_eq(&normalized(&make_vector(0.0,3.0,4.0)), &make_vector(0.0,0.6,0.8)));
 }
+
+struct Color {
+    r: f64,
+    g: f64,
+    b: f64,
+}
+
+fn make_color(r:f64, g:f64, b:f64) -> Color {
+    return Color {r,g,b};
+}
+
+impl ApproxEq for Color {
+    type Output = f64;
+    fn is_approx_eq(&self, other: &Color) -> bool {
+        return self.r.is_approx_eq(&other.r) && 
+               self.g.is_approx_eq(&other.g) && 
+               self.b.is_approx_eq(&other.b);
+    }
+}
+
+impl Add for &Color {
+    type Output = Color;
+    fn add(self, other:&Color) -> Color {
+        make_color(self.r+other.r, self.g+other.g, self.b+other.b)
+    }
+}
+
+impl AddAssign<&Color> for Color {
+    fn add_assign(&mut self, other:&Self) {
+        self.r += other.r;
+        self.g += other.g;
+        self.b += other.b;
+    }
+}
+
+#[test]
+fn test_add_color() {
+    let mut c = make_color(0.1,0.2,0.3);
+    assert!(is_approx_eq(&(&c + &make_color(0.2,0.3,0.1)), &make_color(0.3,0.5,0.4)));
+    assert!(is_approx_eq(&(&make_color(0.9, 0.6, 0.75) + &make_color(0.7, 0.1, 0.25)), &make_color(1.6, 0.7, 1.0)));
+
+    c += &make_color(0.2, 0.3, 0.2);
+    assert!(is_approx_eq(&c, &make_color(0.3,0.5,0.5)));
+}
+
+impl Sub for &Color {
+    type Output = Color;
+    fn sub(self, other:&Color) -> Color {
+        make_color(self.r-other.r, self.g-other.g, self.b-other.b)
+    }
+}
+
+impl SubAssign<&Color> for Color {
+    fn sub_assign(&mut self, other:&Self) {
+        self.r -= other.r;
+        self.g -= other.g;
+        self.b -= other.b;
+    }
+}
+
+#[test]
+fn test_sub_color() {
+    assert!(is_approx_eq(&(&make_color(0.1,0.2,0.3) - &make_color(0.4,0.5,0.6)), &make_color(-0.3,-0.3,-0.3)));
+
+    let mut a = make_color(0.2,0.3,0.6);
+    a -= &make_color(0.3,0.4,0.1);
+    assert!(is_approx_eq(&a, &make_color(-0.1,-0.1,0.5)));
+
+    assert!(is_approx_eq(&(&make_color(0.9, 0.6, 0.75) - &make_color(0.7, 0.1, 0.25)), &make_color(0.2, 0.5, 0.5)));
+}
+
+impl Mul<f64> for &Color {
+    type Output = Color;
+    fn mul(self, scale:f64) -> Color {
+        make_color(self.r*scale, self.g*scale, self.b*scale)
+    }
+}
+
+impl MulAssign<f64> for Color {
+    fn mul_assign(&mut self, scale:f64) {
+        self.r *= scale;
+        self.g *= scale;
+        self.b *= scale;
+    }
+}
+
+// Hadamard or Schur product
+// Produces the result of, for example, illuminating one color with another color light
+impl Mul<&Color> for &Color {
+    type Output = Color;
+    fn mul(self, other:&Color) -> Color {
+        make_color(self.r*other.r, self.g*other.g, self.b*other.b)
+    }
+}
+
+impl MulAssign<&Color> for Color {
+    fn mul_assign(&mut self, other:&Color) {
+        self.r *= other.r;
+        self.g *= other.g;
+        self.b *= other.b;
+    }
+}
+
+#[test]
+fn test_mul_color() {
+    assert!(is_approx_eq(&(&make_color(0.1,0.2,0.3) * 2.0), &make_color(0.2,0.4,0.6)));
+
+    let mut a = make_color(0.8,0.35,0.56);
+    a *= 0.5;
+    assert!(is_approx_eq(&a, &make_color(0.4,0.175,0.28)));
+
+    assert!(is_approx_eq(&(&make_color(0.2, 0.3, 0.4) * 2.0), &make_color(0.4, 0.6, 0.8)));
+
+    assert!(is_approx_eq(&(&make_color(1.0, 0.2, 0.4) * &make_color(0.9, 1.0, 0.1)), &make_color(0.9, 0.2, 0.04)));
+}
+
+
 
 fn main() {
     println!("Ray Tracer!");

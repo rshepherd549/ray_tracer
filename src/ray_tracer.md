@@ -31,4 +31,14 @@ impl<'a,'b> AddAssign<&'b Tuple> for Tuple {
   - this allows different types
   - *might also imply/allow different lifetimes?*
 
+## Color, Add, Sub, Mul
+
+More practice with traits.
+Starting to clarify the different purposes of types in `impl`:
+- reference or value
+- mut or not
+- assumptions or specification of rhs type
+
+Haven't figured out `self` vs `Self`, but can see the point of not repeating the type and using self.
+Haven't figured out why `type Output` needs to be defined for `Add` but `AddAsssign`
 
